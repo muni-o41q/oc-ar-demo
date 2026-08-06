@@ -84,6 +84,7 @@
   <a-scene
     vr-mode-ui="enabled: false"
     renderer="logarithmicDepthBuffer: true; precision: medium;"
+    id="scene"
     arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
     embedded
     loading-screen="enabled: false"
@@ -136,6 +137,11 @@
   </a-scene>
 
   <script>
+    // URLに ?debug=1 を付けると、AR.jsの検出デバッグ表示（白黒2値化映像＋検出枠）が見える
+    if (new URLSearchParams(location.search).get('debug') === '1') {
+      document.getElementById('scene').setAttribute('arjs', { debugUIEnabled: true });
+    }
+
     window.addEventListener('load', () => {
       const scene = document.querySelector('a-scene');
       const loading = document.getElementById('loading');
