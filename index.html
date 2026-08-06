@@ -38,6 +38,37 @@
       font-size: .95rem; padding: 0 12px; pointer-events: none;
     }
   </style>
+
+  <script>
+    // ドラゴンのglTFには「Cloth Backdrop」という背景用の板ポリゴンが同梱されており、
+    // 元のガラス質素材（KHR_materials_transmission）はAR.js環境では正しく描画されず、
+    // 背景の板だけが見えて本体が動いていないように見える現象が起きる。
+    // モデル読み込み後にこの2点を補正する。
+    AFRAME.registerComponent('fix-dragon-model', {
+      schema: { color: { type: 'color', default: '#2f8f4e' } },
+      init: function () {
+        this.el.addEventListener('model-loaded', () => {
+          const mesh = this.el.getObject3D('mesh');
+          if (!mesh) return;
+          const solidMaterial = new THREE.MeshStandardMaterial({
+            color: this.data.color,
+            metalness: 0.15,
+            roughness: 0.55
+          });
+          mesh.traverse((node) => {
+            if (node.name === 'Cloth Backdrop') {
+              node.visible = false; // 背景板を非表示に
+              return;
+            }
+            if (node.isMesh) {
+              node.material = solidMaterial; // 半透明ガラス材質→不透明な単色材質に置き換え
+              node.castShadow = false;
+            }
+          });
+        });
+      }
+    });
+  </script>
 </head>
 <body>
 
@@ -64,8 +95,8 @@
       <a-asset-item id="hero-model"  src="models/hero.glb"></a-asset-item>
     </a-assets>
 
-    <!-- ① マーカー: Hiro → キャラ: きつね（動物） -->
-    <a-marker type="pattern" preset="hiro" id="marker-fox" emitevents="true">
+    <!-- ① マーカー: 手裏剣風アイコン → キャラ: きつね（動物） -->
+    <a-marker type="pattern" url="markers/marker1.patt" id="marker-fox" emitevents="true">
       <a-entity
         gltf-model="#fox-model"
         scale="0.045 0.045 0.045"
@@ -76,26 +107,27 @@
       ></a-entity>
     </a-marker>
 
-    <!-- ② マーカー: Kanji → キャラ: 歩く人型ロボット（おもしろキャラ） -->
-    <a-marker type="pattern" preset="kanji" id="marker-hero" emitevents="true">
+    <!-- ② マーカー: ジグザグ帯アイコン → キャラ: 歩く人型ロボット（おもしろキャラ） -->
+    <a-marker type="pattern" url="markers/marker2.patt" id="marker-hero" emitevents="true">
       <a-entity
         gltf-model="#hero-model"
         scale="0.55 0.55 0.55"
         rotation="0 180 0"
         position="0 0 0"
         animation-mixer="loop: repeat"
-        animation="property: rotation; dir: normal; dur: 6000; easing: linear; to: 0 540 0; loop: true"
+        animation="property: rotation; dir: normal; dur: 6000; easing: linear; from: 0 180 0; to: 0 540 0; loop: true"
       ></a-entity>
     </a-marker>
 
-    <!-- ③ マーカー: LetterA → キャラ: ドラゴン -->
-    <a-marker type="pattern" url="markers/letterA.patt" id="marker-dragon" emitevents="true">
+    <!-- ③ マーカー: 三角形クラスターアイコン → キャラ: ドラゴン -->
+    <a-marker type="pattern" url="markers/marker3.patt" id="marker-dragon" emitevents="true">
       <a-entity
         gltf-model="#dragon-model"
-        scale="0.35 0.35 0.35"
+        fix-dragon-model="color: #2f8f4e"
+        scale="0.5 0.5 0.5"
         rotation="0 180 0"
         position="0 0 0"
-        animation__spin="property: rotation; dir: normal; dur: 9000; easing: linear; to: 0 360 0; loop: true"
+        animation__spin="property: rotation; dir: normal; dur: 9000; easing: linear; from: 0 180 0; to: 0 540 0; loop: true"
         animation__float="property: position; dir: alternate; dur: 1600; easing: easeInOutSine; to: 0 0.15 0; loop: true"
       ></a-entity>
     </a-marker>
