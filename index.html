@@ -45,15 +45,25 @@
     // 背景の板だけが見えて本体が動いていないように見える現象が起きる。
     // モデル読み込み後にこの2点を補正する。
     AFRAME.registerComponent('fix-dragon-model', {
-      schema: { color: { type: 'color', default: '#2f8f4e' } },
+      schema: { color: { type: 'color', default: '#eba310' } }, // 元データが意図していた琥珀色(アンバー)
       init: function () {
+        const textureLoader = new THREE.TextureLoader();
+        // 元のガラス素材が使っていた「厚みマップ」を流用し、場所ごとに濃淡が出るようにする
+        const thicknessMap = textureLoader.load('models/dragon_thickness.jpg');
+
         this.el.addEventListener('model-loaded', () => {
           const mesh = this.el.getObject3D('mesh');
           if (!mesh) return;
           const solidMaterial = new THREE.MeshStandardMaterial({
             color: this.data.color,
-            metalness: 0.15,
-            roughness: 0.55
+            metalness: 0.3,
+            roughness: 0.4,
+            roughnessMap: thicknessMap,   // 厚みの濃淡でツヤの出方に変化を持たせる
+            aoMap: thicknessMap,          // 陰影の濃淡も加えて立体感を出す
+            aoMapIntensity: 0.8,
+            emissive: this.data.color,
+            emissiveMap: thicknessMap,    // 薄い部分ほど内側から光っているように見せる
+            emissiveIntensity: 0.35
           });
           mesh.traverse((node) => {
             if (node.name === 'Cloth Backdrop') {
@@ -61,7 +71,11 @@
               return;
             }
             if (node.isMesh) {
-              node.material = solidMaterial; // 半透明ガラス材質→不透明な単色材質に置き換え
+              // aoMap/roughnessMapを使うにはuv2が必要なため、既存のuvを複製して割り当てる
+              if (node.geometry && node.geometry.attributes.uv && !node.geometry.attributes.uv2) {
+                node.geometry.setAttribute('uv2', node.geometry.attributes.uv);
+              }
+              node.material = solidMaterial; // 半透明ガラス材質→濃淡のある琥珀色の材質に置き換え
               node.castShadow = false;
             }
           });
@@ -132,6 +146,9 @@
         animation__float="property: position; dir: alternate; dur: 1600; easing: easeInOutSine; to: 0 0.15 0; loop: true"
       ></a-entity>
     </a-marker>
+
+    <a-entity light="type: ambient; color: #fff; intensity: 0.9"></a-entity>
+    <a-entity light="type: directional; color: #fff; intensity: 0.6" position="1 1 1"></a-entity>
 
     <a-entity camera></a-entity>
   </a-scene>
