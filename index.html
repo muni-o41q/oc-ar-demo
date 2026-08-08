@@ -96,7 +96,7 @@
       <a-asset-item id="hero-model"  src="models/hero.glb"></a-asset-item>
     </a-assets>
 
-    <!-- ① マーカー: 手裏剣風アイコン → キャラ: きつね（動物） -->
+    <!-- ① マーカー: ● (丸) → キャラ: きつね（動物） -->
     <a-marker type="pattern" url="markers/marker1.patt" id="marker-fox" emitevents="true">
       <a-entity
         gltf-model="#fox-model"
@@ -108,7 +108,7 @@
       ></a-entity>
     </a-marker>
 
-    <!-- ② マーカー: ジグザグ帯アイコン → キャラ: 歩く人型ロボット（おもしろキャラ） -->
+    <!-- ② マーカー: ▲ (三角) → キャラ: 歩く人型ロボット（おもしろキャラ） -->
     <a-marker type="pattern" url="markers/marker2.patt" id="marker-hero" emitevents="true">
       <a-entity
         gltf-model="#hero-model"
@@ -120,7 +120,7 @@
       ></a-entity>
     </a-marker>
 
-    <!-- ③ マーカー: 三角形クラスターアイコン → キャラ: ドラゴン -->
+    <!-- ③ マーカー: × (バッテン) → キャラ: ドラゴン -->
     <a-marker type="pattern" url="markers/marker3.patt" id="marker-dragon" emitevents="true">
       <a-entity
         gltf-model="#dragon-model"
@@ -137,11 +137,6 @@
   </a-scene>
 
   <script>
-    // URLに ?debug=1 を付けると、AR.jsの検出デバッグ表示（白黒2値化映像＋検出枠）が見える
-    if (new URLSearchParams(location.search).get('debug') === '1') {
-      document.getElementById('scene').setAttribute('arjs', { debugUIEnabled: true });
-    }
-
     window.addEventListener('load', () => {
       const scene = document.querySelector('a-scene');
       const loading = document.getElementById('loading');
